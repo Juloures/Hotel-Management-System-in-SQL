@@ -1,0 +1,104 @@
+-- 1. Create the database
+DROP DATABASE IF EXISTS HotelManagementSystem;
+SET SQL_SAFE_UPDATES = 0;
+CREATE DATABASE HotelManagementSystem;
+
+-- Use the created database
+USE HotelManagementSystem;
+
+-- 2. Create the tables
+
+-- Guests Table
+CREATE TABLE Guests (
+    id_guest INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    phone VARCHAR(15),
+    email VARCHAR(100)
+);
+
+-- Rooms Table
+CREATE TABLE Rooms (
+    id_room INT PRIMARY KEY AUTO_INCREMENT,
+    number INT NOT NULL,
+    type VARCHAR(50),
+    price DECIMAL(10, 2)
+);
+
+-- Reservations Table
+CREATE TABLE Reservations (
+    id_reservation INT PRIMARY KEY AUTO_INCREMENT,
+    id_guest INT,
+    id_room INT,
+    checkin_date DATE,
+    checkout_date DATE,
+    FOREIGN KEY (id_guest) REFERENCES Guests(id_guest) ON DELETE CASCADE,
+    FOREIGN KEY (id_room) REFERENCES Rooms(id_room) ON DELETE CASCADE
+);
+
+-- 3. Insert data
+
+-- Add Guests
+INSERT INTO Guests (name, phone, email) VALUES
+('João Silva', '11987654321', 'joao.silva@example.com'),
+('Maria Oliveira', '21987654321', 'maria.oliveira@example.com'),
+('Carlos Souza', '31987654321', 'carlos.souza@example.com'),
+('Ana Lima', '41987654321', 'ana.lima@example.com'),
+('Fernanda Costa', '51987654321', 'fernanda.costa@example.com');
+
+-- Add Rooms
+INSERT INTO Rooms (number, type, price) VALUES
+(101, 'Single', 150.00),
+(102, 'Single', 150.00),
+(201, 'Double', 250.00),
+(202, 'Double', 250.00),
+(301, 'Suite', 400.00),
+(302, 'Suite', 400.00),
+(303, 'Suite', 450.00),
+(401, 'Presidential', 800.00),
+(402, 'Presidential', 800.00),
+(403, 'Presidential', 850.00);
+
+-- Add Reservations
+INSERT INTO Reservations (id_guest, id_room, checkin_date, checkout_date) VALUES
+(1, 1, '2024-09-10', '2024-09-15'),
+(2, 2, '2024-09-12', '2024-09-18'),
+(3, 3, '2024-09-14', '2024-09-20'),
+(4, 4, '2024-09-15', '2024-09-22'),
+(5, 5, '2024-09-16', '2024-09-23');
+
+-- 4. Query data
+
+-- List guests with their reservations
+SELECT G.name, R.id_reservation, RM.number, RM.type, RM.price, R.checkin_date, R.checkout_date
+FROM Guests G
+JOIN Reservations R ON G.id_guest = R.id_guest
+JOIN Rooms RM ON R.id_room = RM.id_room;
+
+-- List available rooms for a specific period
+SELECT * FROM Rooms RM
+WHERE RM.id_room NOT IN (
+    SELECT id_room FROM Reservations
+    WHERE checkin_date <= '2024-09-18' AND checkout_date >= '2024-09-12'
+);
+
+-- 5. Update data
+
+-- Update guest contact information
+UPDATE Guests
+SET phone = '11912345678', email = 'new.email@example.com'
+WHERE id_guest = 1;
+
+-- Update room price
+UPDATE Rooms
+SET price = 160.00
+WHERE id_room = 1;
+
+-- 6. Delete data
+
+-- Delete a specific reservation
+DELETE FROM Reservations
+WHERE id_reservation = 2;
+
+-- Remove a guest and their reservations
+DELETE FROM Guests
+WHERE id_guest = 1;
